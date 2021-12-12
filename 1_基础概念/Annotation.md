@@ -36,4 +36,25 @@ WebGL只关心两件事：裁剪空间中的坐标值和颜色值。使用WebGL�
 
 可变量是一种顶点着色器给片断着色器传值的方式，依照渲染的图元是点， 线还是三角形，顶点着色器中设置的可变量会在片断着色器运行中获取不同的插值。
 
-具体见demo
+具体见demo1
+
+
+type="notjs" 是什么意思?
+<script> 标签内默认放置的是JavaScript代码。 你可以不定义type或者定义 type="javascript" 或者 type="text/javascript" ，浏览器则会将内容翻译成JavaScript。 如果你对 type 有其它任何定义。浏览器会忽略script标签的内容。 换句话说，对浏览器而言 type="notjs" 或者 type="foobar" 都是没有意义的。
+
+这样就可以很方便的编辑着色器。另一个选择是像下方那样串联字符串
+
+  var shaderSource =
+    "void main() {\n" +
+    "  gl_FragColor = vec4(1,0,0,1);\n" +
+    "}";
+或者我们可以使用AJAX请求，但是那样会比较慢并且是异步的。
+
+另一个如今常用的做法是多行模板文字。
+
+  var shaderSource = `
+    void main() {
+      gl_FragColor = vec4(1,0,0,1);
+    }
+  `;
+多行模板文字可在支持WebGL的所有浏览器中使用。 不过它不能在较早版本的浏览器中运行，所以如果你很在意浏览器的后向支持， 你也许可以考虑使用一个转换器代替多行模板文字。

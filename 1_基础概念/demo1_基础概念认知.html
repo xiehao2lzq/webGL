@@ -127,11 +127,14 @@ for webgl-utils, m3, m4, and webgl-lessons-ui.
             var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
 
             // Create a buffer and put three 2d clip space points in it
+            // 属性值从缓冲中获取数据，所以我们创建一个缓冲
             var positionBuffer = gl.createBuffer();
 
             // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
+            // WebGL可以通过绑定点操控全局范围内的许多数据，你可以把绑定点想象成一个WebGL内部的全局变量。
+            // 首先绑定一个数据源到绑定点，然后可以引用绑定点指向该数据源。 所以让我们来绑定位置信息缓冲（下面的绑定点就是ARRAY_BUFFER）
             gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-
+            // 通过绑定点向缓冲中存放数据
             var positions = [
                 0, 0,
                 0, 0.5,
@@ -139,12 +142,24 @@ for webgl-utils, m3, m4, and webgl-lessons-ui.
             ];
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
+            // 这里完成了一系列事情，第一件事是我们有了一个JavaScript序列positions 。
+            // 然而WebGL需要强类型数据，所以new Float32Array(positions)创建了32位浮点型数据序列， 并从positions中复制数据到序列中，然后gl.bufferData复制这些数据到GPU的positionBuffer对象上。 
+            // 它最终传递到positionBuffer上是因为在前一步中我们我们将它绑定到了ARRAY_BUFFER（也就是绑定点）上。
+
+            // 最后一个参数gl.STATIC_DRAW是提示WebGL我们将怎么使用这些数据。WebGL会根据提示做出一些优化。
+            // gl.STATIC_DRAW提示WebGL我们不会经常改变这些数据。
+
+            // 在此之上的代码是 初始化代码。这些代码在页面加载时只会运行一次。
+
+
+            
             // code above this line is initialization code.
             // code below this line is rendering code.
 
             webglUtils.resizeCanvasToDisplaySize(gl.canvas);
 
             // Tell WebGL how to convert from clip space to pixels
+            // 告诉 WebGL 如何从剪辑空间转换为像素
             gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
             // Clear the canvas
@@ -152,23 +167,33 @@ for webgl-utils, m3, m4, and webgl-lessons-ui.
             gl.clear(gl.COLOR_BUFFER_BIT);
 
             // Tell it to use our program (pair of shaders)
+            // 告诉它用我们之前写好的着色程序（一个着色器对）
             gl.useProgram(program);
 
             // Turn on the attribute
+            // 启用对应属性
             gl.enableVertexAttribArray(positionAttributeLocation);
 
             // Bind the position buffer.
+            // // 将绑定点绑定到缓冲数据（positionBuffer）
             gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
             // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
-            var size = 2; // 2 components per iteration
-            var type = gl.FLOAT; // the data is 32bit floats
-            var normalize = false; // don't normalize the data
+            // 告诉属性怎么从positionBuffer中读取数据 (ARRAY_BUFFER) 
+            var size = 2; // 2 components per iteration // 每次迭代运行提取两个单位数据
+            var type = gl.FLOAT; // the data is 32bit floats // 每个单位的数据类型是32位浮点型
+            var normalize = false; // don't normalize the data // 不需要归一化数据
             var stride = 0; // 0 = move forward size * sizeof(type) each iteration to get the next position
-            var offset = 0; // start at the beginning of the buffer
+                            // 0 = 移动单位数量 * 每个单位占用内存（sizeof(type)） 每次迭代运行运动多少内存到下一个数据开始点
+            var offset = 0; // start at the beginning of the buffer  // 从缓冲起始位置开始读取
+
+            // 一个隐藏信息是gl.vertexAttribPointer是将属性绑定到当前的ARRAY_BUFFER。
+            // 换句话说就是属性绑定到了positionBuffer上
+            // 这也意味着现在利用绑定点随意将 ARRAY_BUFFER绑定到其它数据上后，该属性依然从positionBuffer上读取数据。
             gl.vertexAttribPointer(
                 positionAttributeLocation, size, type, normalize, stride, offset);
-
+            // vec4是一个有四个浮点数据的数据类型。在JavaScript中你可以把它想象成 a_position = {x: 0, y: 0, z: 0, w: 0}。之前我们设置的size = 2，
+            // 属性默认值是0, 0, 0, 1，然后属性将会从缓冲中获取前两个值（ x 和 y ）。 z和w还是默认值 0 和 1 。
             // draw
             var primitiveType = gl.TRIANGLES;
             var offset = 0;
@@ -177,6 +202,7 @@ for webgl-utils, m3, m4, and webgl-lessons-ui.
         }
 
         main();
+        // 绘制每个像素时WebGL都将调用我们的片断着色器。 我们的片断着色器只是简单设置gl_FragColor为1, 0, 0.5, 1， 由于画布的每个通道宽度为8位，这表示WebGL最终在画布上绘制[255, 0, 127, 255]。
     </script>
 </body>
 
