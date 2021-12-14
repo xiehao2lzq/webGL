@@ -173,14 +173,17 @@ function main() {
     var projectionMatrix = m4.perspective(fieldOfViewRadians, aspect, zNear, zFar);
 
     // Compute the position of the first F
+    // 计算第一个 F 的位置
     var fPosition = [radius, 0, 0];
 
     // Use matrix math to compute a position on a circle where
     // the camera is
+    // 计算相机在圆上的位置矩阵
     var cameraMatrix = m4.yRotation(cameraAngleRadians);
     cameraMatrix = m4.translate(cameraMatrix, 0, 0, radius * 1.5);
 
     // Get the camera's position from the matrix we computed
+    // 获得矩阵中相机的位置
     var cameraPosition = [
       cameraMatrix[12],
       cameraMatrix[13],
@@ -190,9 +193,11 @@ function main() {
     var up = [0, 1, 0];
 
     // Compute the camera's matrix using look at.
+    // 计算相机的朝向矩阵
     var cameraMatrix = m4.lookAt(cameraPosition, fPosition, up);
 
     // Make a view matrix from the camera matrix
+    // 通过相机矩阵获得视图矩阵
     var viewMatrix = m4.inverse(cameraMatrix);
 
     // Compute a view projection matrix
@@ -218,11 +223,11 @@ function main() {
     }
   }
 }
-
+// 向量相减
 function subtractVectors(a, b) {
   return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 }
-
+// 单位化向量
 function normalize(v) {
   var length = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
   // make sure we don't divide by 0.
@@ -232,7 +237,7 @@ function normalize(v) {
     return [0, 0, 0];
   }
 }
-
+// 计算叉乘
 function cross(a, b) {
   return [a[1] * b[2] - a[2] * b[1],
           a[2] * b[0] - a[0] * b[2],
@@ -242,7 +247,7 @@ function cross(a, b) {
 
 
 var m4 = {
-
+  // 计算“朝向”矩阵
   lookAt: function(cameraPosition, target, up) {
     var zAxis = normalize(
         subtractVectors(cameraPosition, target));
