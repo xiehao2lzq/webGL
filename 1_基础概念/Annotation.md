@@ -58,3 +58,21 @@ type="notjs" 是什么意思?
     }
   `;
 多行模板文字可在支持WebGL的所有浏览器中使用。 不过它不能在较早版本的浏览器中运行，所以如果你很在意浏览器的后向支持， 你也许可以考虑使用一个转换器代替多行模板文字。
+
+在编写顶点着色器的时候，遇到了一个变量gl_Position如下：
+
+#version 330 core
+layout (location = 0) in vec3 aPos; // 位置变量的属性位置值为0
+
+out vec4 vertexColor; // 为片段着色器指定一个颜色输出
+
+void main()
+{
+    gl_Position = vec4(aPos, 1.0); // 注意我们如何把一个vec3作为vec4的构造器的参数
+    vertexColor = vec4(0.5, 0.0, 0.0, 1.0); // 把输出变量设置为暗红色
+}
+
+它并没有类型in、out或是uniform的声明，而是直接使用，且在后面的程序中也未被引用。原来它是默认是归一化的裁剪空间坐标，xyz各个维度的范围为-1到1，仅能在顶点着色器中使用，既是输入也是输出。gl_Position赋值范围就是float的取值范围(32位)，只不过只有[-1,1]区间的片元被绘制。它是vec4类型的，不能重声明为dvec4等类型。
+gl_Position可以通过视角划分转换为标准化设备空间中的笛卡尔坐标：
+
+vec3 ndc = gl_Position.xyz / gl_Position.w;
